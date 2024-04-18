@@ -1,0 +1,135 @@
+import pygame
+import os
+pygame.init()
+pygame.font.init()
+
+WIDTH, HEIGHT = 900, 500
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Bong Pong')
+
+
+
+FPS = 60
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GRAY = (50, 50 , 50)
+BORDER = pygame.Rect(WIDTH// 2 -5, 0, 10, HEIGHT)
+VEL = 5
+PLAYER_HEIGHT = 50
+PLAYER_WIDTH = 15
+BALL_HEIGHT = 15
+BALL_WIDTH = 15
+
+SCORE_FONT = pygame.font.SysFont('timesnewroman', 40)
+WINNER_FONT = pygame.font.SysFont('timesnewroman', 80)
+
+def draw_window(player_1, player_2, game_ball, player_1_score, player_2_score):
+    WIN.fill(WHITE)
+    pygame.draw.rect(WIN, BLACK, BORDER)
+    pygame.draw.rect(WIN, BLACK, player_1)
+    pygame.draw.rect(WIN, BLACK, player_2)
+    pygame.draw.rect(WIN, RED, game_ball)
+    player_1_score_text = SCORE_FONT.render("Score: " + str(player_1_score), 1, BLACK)
+    player_2_score_text = SCORE_FONT.render("Score: " + str(player_2_score), 1, BLACK)
+    WIN.blit(player_1_score_text, (10, 10))
+    WIN.blit(player_2_score_text, (480, 10))
+    pygame.display.update()
+
+
+def player_1_movement(keys_pressed, player_1):
+    if keys_pressed[pygame.K_w] and player_1.y - VEL > 0:
+        player_1.y -= VEL
+    if keys_pressed [pygame.K_s] and player_1.y + PLAYER_HEIGHT + VEL < 500:
+        player_1.y += VEL
+    
+def player_2_movement(keys_pressed, player_2):
+    if keys_pressed[pygame.K_UP] and player_2.y - VEL > 0:
+        player_2.y -= VEL
+    if keys_pressed [pygame.K_DOWN] and player_2.y + PLAYER_HEIGHT + VEL < 500:
+        player_2.y += VEL
+       
+def draw_winner(text):
+    winner_winner = WINNER_FONT.render(text,1, BLACK, GRAY)
+    WIN.blit(winner_winner, (WIDTH // 2 - winner_winner.get_width()// 2 , HEIGHT //2 - winner_winner.get_height()// 2))
+    pygame.display.update()
+    pygame.time.delay(3000)        
+    
+    
+
+def main(): 
+    clock = pygame.time.Clock()
+    run = True
+
+    player_1 = pygame.Rect(50, HEIGHT//2 - PLAYER_HEIGHT// 2, PLAYER_WIDTH, PLAYER_HEIGHT)
+    player_2 = pygame.Rect(850, HEIGHT//2 - PLAYER_HEIGHT// 2, PLAYER_WIDTH, PLAYER_HEIGHT)
+    game_ball = pygame.Rect(50 + PLAYER_WIDTH, HEIGHT//2 - BALL_HEIGHT// 2, BALL_WIDTH, BALL_HEIGHT)
+    ball_vel_y = 2
+    ball_vel_x = 2
+    player_1_score = 0 
+    player_2_score = 0 
+
+
+    while run:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False 
+                pygame.QUIT()
+        
+
+        the_winner_text = ""
+
+        if player_1_score >= 1:
+            the_winner_text = "Player 1 Wins!"
+
+        if player_2_score >= 10:
+            the_winner_text = "Player 2 Wins!"
+
+        if the_winner_text != "":
+            draw_winner(the_winner_text)
+            break
+            
+        keys_pressed = pygame.key.get_pressed()
+        player_1_movement(keys_pressed, player_1)
+        player_2_movement(keys_pressed, player_2)
+        draw_window(player_1, player_2, game_ball, player_1_score, player_2_score)
+        
+        # Swtich ball directions
+        if game_ball.y - BALL_HEIGHT - VEL <= 0 or game_ball.y + BALL_HEIGHT + VEL >= 500:
+            ball_vel_y *= -1
+
+        # Start Movmeent
+        game_ball.y -= ball_vel_y
+
+        # Collisions
+        if game_ball.colliderect(player_1) or game_ball.colliderect(player_2):
+            ball_vel_x *= -1
+        # Start X movement
+        game_ball.x += ball_vel_x
+
+        # handles scoring and resets
+        if game_ball.x >= 900:
+            player_1_score += 1
+            pygame.time.delay(1000)
+        if game_ball.x > 900:
+            game_ball.x = 50
+            ball_vel_x = 2
+            ball_vel_y = 2
+        if game_ball.x <= 0:
+            player_2_score += 2
+            pygame.time.delay(1000)
+        if game_ball.x < 0:
+            game_ball.x = 850
+            ball_vel_x = 2
+            ball_vel_y = 2
+
+        
+    
+
+
+    
+
+if __name__ == '__main__':
+    main()
+     
